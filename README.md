@@ -28,6 +28,10 @@ This project is a Rust-based rewrite of a Bash script that provides a simple ter
    ```sh
    cargo build --release
    ```
+4. strip the binary (optional):
+   ```sh
+   strip target/release/bashmenu_rust
+   ```
 
 ### Usage
 
@@ -42,6 +46,10 @@ Follow the on-screen prompts to select a command to execute, add a new command, 
 ## Adding New Commands
 
 To add a new command, select the "new" option from the menu, then enter the command and a nickname when prompted. The command will be saved as a `.menuitem` file in the current directory and will be available in the menu the next time BashMenu Rust is run.
+
+## Create shortcut (optional)
+
+Create a single letter alias to open the menu.
 
 ## Contributing
 
