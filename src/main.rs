@@ -1,6 +1,7 @@
 use std::fs::{self, File};
 use std::io::{self, Write, BufRead, BufReader};
 use std::path::Path;
+use std::process::{self, Command};
 
 fn main() -> io::Result<()> {
     loop {
@@ -24,22 +25,22 @@ fn main() -> io::Result<()> {
 
         let mut choice = String::new();
         io::stdin().read_line(&mut choice).unwrap();
-        let choice = choice.trim().parse::<usize>().unwrap_or(0);
+        let choice = choice.trim().parse::<usize>().ok();
 
-        if choice == files.len() + 1 {
-            break;
-        } else if choice == files.len() + 2 {
-            add_new_command()?;
-        } else if choice >= 1 && choice <= files.len() {
-            let filename = format!("{}.menuitem", files[choice - 1]);
-            let file = File::open(filename)?;
-            let command = BufReader::new(file).lines().next().unwrap()?;
-            println!("Executing: {}", command);
-            // Here you should execute the command. In Rust, you'd typically use std::process::Command,
-            // but note that executing arbitrary commands can be dangerous.
-            // std::process::Command::new("sh").arg("-c").arg(&command).spawn()?.wait()?;
-        } else {
-            println!("Invalid choice. Please choose a valid number.");
+        match choice {
+            Some(choice) if choice == files.len() + 1 => break,
+            Some(choice) if choice == files.len() + 2 => add_new_command()?,
+            Some(choice) if choice >= 1 && choice <= files.len() => {
+                let filename = format!("{}.menuitem", files[choice - 1]);
+                let file = File::open(filename)?;
+                let command = BufReader::new(file).lines().next().unwrap()?;
+                println!("Executing: {}", command);
+                if let Err(e) = Command::new("sh").arg("-c").arg(&command).status() {
+                    eprintln!("Failed to execute command: {}", e);
+                }
+                process::exit(0); // Exit after executing the command
+            },
+            _ => println!("Invalid choice. Please choose a valid number."),
         }
     }
 
